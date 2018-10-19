@@ -3,6 +3,7 @@ import numpy as np
 
 
 def least_squares_GD(y, tx, initial_w, max_iters, gamma):
+<<<<<<< HEAD
     '''Linear regression using gradient descent.'''
 
 
@@ -103,3 +104,38 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
         if start_index != end_index:
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:
                                                                  end_index]
+=======
+    '''
+    Linear regression using gradient descent
+    '''
+
+
+def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
+    '''
+    Linear regression using stochastic gradient descent
+    '''
+
+
+def least_squares(y, tx):
+    '''
+    Least squares regression using normal equations
+    '''
+
+
+def ridge_regression(y, tx, lambda_):
+    '''
+    Ridge regression using normal equations
+    '''
+
+
+def logistic_regression(y, tx, initial_w, max_iters, gamma):
+    '''
+    Logistic regression using gradient descent or SGD
+    '''
+
+
+def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
+    '''
+    Regularized logistic regression using gradient descent or SGD
+    '''
+>>>>>>> 3c3012ed668d40e3f0d68be6a572ae1bca6e8818
