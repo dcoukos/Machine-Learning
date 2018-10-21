@@ -4,6 +4,18 @@ import numpy as np
 
 def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     '''Linear regression using gradient descent.'''
+    ws = [initial_w]
+    losses = []
+    w = initial_w
+
+    # Use max iterations.
+    for iter_n in range(max_iters):
+        grad, err = compute_gradient(y, tx, w)
+        w = w - gamma*grad
+        ws.append(w)
+        # Using mean squared error.
+        losses.append((1/2)*np.mean(err**2))
+    return ws, losses
 
 
 def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
@@ -12,12 +24,13 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     ws = [initial_w]
     losses = []
     w = initial_w
+    batch_size = 5
 
     for n_iter in range(max_iters):
         for y_batch, tx_batch in batch_iter(y, tx, batch_size=batch_size,
                                             num_batches=1):
             # compute a stochastic gradient and loss
-            grad, _ = compute_stoch_gradient(y_batch, tx_batch, w)
+            grad, _ = compute_gradient(y_batch, tx_batch, w)
             # update w through the stochastic gradient update
             w = w - gamma * grad
             # calculate loss
@@ -26,9 +39,10 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
             ws.append(w)
             losses.append(loss)
 
-        print("SGD({bi}/{ti}): loss={l}, w0={w0}, w1={w1}".format(
-              bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
+        print("SGD({bi}/{ti}): loss={lo}, w0={w0}, w1={w1}".format(
+              bi=n_iter, ti=max_iters - 1, lo=loss, w0=w[0], w1=w[1]))
     return losses, ws
+
 
 def least_squares(y, tx):
     '''Least squares regression using normal equations'''
@@ -62,8 +76,8 @@ def compute_gradient(y, tx, w):
     of a convex loss function.
 
     Arguments:
-    y --
-    tx --
+    y -- Observations
+    tx -- Features
     w -- model parameters
 
     Returns:
@@ -103,3 +117,9 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
         if start_index != end_index:
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:
                                                                  end_index]
+
+
+def compute_loss(y, tx, w):
+    '''Compute loss between model output and observation'''
+    error = y - tx.dot(w)
+    return (1/2)*np.mean(err**2)
