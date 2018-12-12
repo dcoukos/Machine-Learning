@@ -5,6 +5,7 @@ __pycache__/
 
 #Raw Data
 raw_data/
+data/data_train.csv
 
 # C extensions
 *.so
