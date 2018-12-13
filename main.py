@@ -1,4 +1,3 @@
-import os
 from pandas import DataFrame
 from data_processing import (open_file, parse_as_dataset, write_predictions)
 from models import svd
@@ -6,7 +5,6 @@ from helpers import set_random
 
 # TODO: Experiment with how to increase the accuracy of low count hits.
 # TODO: Extract predictions from SVD algorithm
-
 
 
 # -------------------------      MAIN       ----------------------------------
