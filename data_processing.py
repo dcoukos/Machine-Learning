@@ -7,6 +7,7 @@
 '''
 import os
 import pandas as pd
+import numpy as np
 from surprise import Dataset
 from surprise import Reader
 from collections import Counter
@@ -69,14 +70,37 @@ def remove_tail(ratings, min_count=10):
 
 def write_predictions(filename, df_predictions):
     '''Saves predictions in dataframe to file defined by filepath.'''
-    predictions = [(int(u), int(i), rat) for (u, i, _, rat, _)
+    predictions = [(int(i), int(u), int(np.round(rat))) for (i, u, _, rat, _)
                    in df_predictions.values]
     header = 'Id,Prediction\n'
     data = [header]
     for pred in predictions:
-        data.append('r{u}_c{i},{r}\n'.format(u=pred[0], i=pred[1], r=pred[2]))
+        data.append('r{0}_c{1},{2}\n'.format(*pred))
 
-    path = os.path.join('/predicitions/', filename)
+    print(check_labels(data))
+
+    path = os.path.join('predictions/', filename)
     fp = open(path, 'w')
     fp.writelines(data)
     fp.close()
+
+
+def check_labels(data):
+    print('Checking labels')
+    original = open_file('data/data_train.csv')
+    ori_labels = []
+    for line in original:
+        label, _ = line.split(',')
+        ori_labels.append(label)
+
+    pred_labels = []
+    for line in data[1:]:
+        label, _ = line.split(',')
+        pred_labels.append(label)
+
+    differences = set(ori_labels) - set(pred_labels)
+    intersection = set(ori_labels) & set(pred_labels)
+    if len(intersection) == 1176952:
+        return True
+    else:
+        return differences
