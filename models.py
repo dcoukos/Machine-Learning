@@ -22,19 +22,6 @@ def svd(trainset, testset, fullset, force_run=False):
 
     '''
     if not already_predicted('SVD') or force_run:
-
-
-        # ------------ TESTING ---------------
-        from data_processing import (open_file, parse_as_dataset, write_predictions)
-        from models import svd
-        from helpers import set_random
-        set_random()
-        data = open_file('data/data_train.csv')
-        ratings = parse_as_dataset(data)
-        ratings.split(n_folds=8)
-        trainset, testset = next(ratings.folds())
-        fullset = ratings
-        #_______________ END __________________
         print('Running SVD model.')
         algo = SVD()
         algo.fit(trainset)
@@ -59,6 +46,7 @@ def svd(trainset, testset, fullset, force_run=False):
             print('Predictions and algorithm not saved. Performance '
                   'inferior to existing model.')
     else:
+        print('Loading SVD model from file...')
         predictions = load_predictions('SVD')
 
 

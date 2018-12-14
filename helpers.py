@@ -71,12 +71,12 @@ def dump_algo(algo, modelname, rmse):
 
 
 def load_predictions(modelname):
-    filepath = os.path.join('pickles', modelname + '_*' + '.p')
+    filepath = glob(os.path.join('pickles', modelname + '_*'))[0]
     return pickle.load(open(filepath, 'rb'))
 
 
 def load_algo(name):
-    filepath = os.path.join('pickles', 'algo_' + name + '_*' + '.p')
+    filepath = glob(os.path.join('pickles', 'algo_' + name + '_*'))[0]
     return pickle.load(open(filepath, 'rb'))
 
 
