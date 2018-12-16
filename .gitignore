@@ -6,7 +6,7 @@ __pycache__/
 #Data
 raw_data/
 data/data_train.csv
-predictions/*.csv
+predictions/*
 *.p
 
 # C extensions
