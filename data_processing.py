@@ -11,6 +11,7 @@ import numpy as np
 from surprise import Dataset
 from surprise import Reader
 from collections import Counter
+from helpers import already_written
 
 
 def open_file(path):
@@ -68,21 +69,22 @@ def remove_tail(ratings, min_count=10):
     return valid_ratings
 
 
-def write_predictions(filename, df_predictions):
+def write_predictions(modelname, rmse, df_predictions):
     '''Saves predictions in dataframe to file defined by filepath.'''
-    predictions = [(int(i), int(u), int(np.round(rat))) for (i, u, _, rat, _)
-                   in df_predictions.values]
-    header = 'Id,Prediction\n'
-    data = [header]
-    for pred in predictions:
-        data.append('r{0}_c{1},{2}\n'.format(*pred))
+    if already_written(modelname, rmse):
+        return 'already_written'
+    else:
+        predictions = [(int(i), int(u), int(np.round(rat)))
+                       for (i, u, _, rat, _) in df_predictions.values]
+        header = 'Id,Prediction\n'
+        data = [header]
+        for pred in predictions:
+            data.append('r{0}_c{1},{2}\n'.format(*pred))
 
-    print(check_labels(data))
-
-    path = os.path.join('predictions/', filename)
-    fp = open(path, 'w')
-    fp.writelines(data)
-    fp.close()
+        path = os.path.join('predictions/', modelname + '_' + rmse + '.csv')
+        fp = open(path, 'w')
+        fp.writelines(data)
+        fp.close()
 
 
 def check_labels(data):

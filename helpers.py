@@ -1,9 +1,20 @@
 import os
+import time
+import sys
 import random
 import pickle
 import numpy as np
 from glob import glob
 from sklearn.metrics import mean_squared_error
+
+
+def beep():
+    '''Makes a beep, useful for alerts after long algorithms.'''
+    for i in range(1, 6):
+        sys.stdout.write('\r\a{i}'.format(i=i))
+        sys.stdout.flush()
+        time.sleep(1)
+    sys.stdout.write('\n')
 
 
 def set_random(my_seed=0):
@@ -72,7 +83,9 @@ def dump_algo(algo, modelname, rmse):
 
 def load_predictions(modelname):
     filepath = glob(os.path.join('pickles', modelname + '_*'))[0]
-    return pickle.load(open(filepath, 'rb'))
+    predictions = pickle.load(open(filepath, 'rb'))
+    rmse = get_rmse_from_file(modelname)
+    return predictions, rmse
 
 
 def load_algo(name):
@@ -80,12 +93,16 @@ def load_algo(name):
     return pickle.load(open(filepath, 'rb'))
 
 
-def better_rmse(modelname, rmse):
-    '''Checks if pickled predictions, or model have better rmse than current'''
+def get_rmse_from_file(modelname):
     basepath = os.path.join('pickles', modelname + '_')
     filename = os.path.relpath(basepath)
     _, pickled_rmse = filename.split('_')
-    pickled_rmse = pickled_rmse.replace('-', '.')
+    return pickled_rmse.replace('-', '.')
+
+
+def better_rmse(modelname, rmse):
+    '''Checks if pickled predictions, or model have better rmse than current'''
+    pickled_rmse = get_rmse_from_file(modelname)
     if rmse > float(pickled_rmse):
         return True
     else:
@@ -96,6 +113,15 @@ def already_predicted(modelname):
     '''Checks if movie ratings have been predicted already using a model'''
     basepath = os.path.join('pickles')
     if glob(os.path.join(basepath, modelname + '_*')):
+        return True
+    else:
+        return False
+
+
+def already_written(modelname, rmse):
+    '''Checks if predictions already exist.'''
+    basepath = os.path.join('precitions')
+    if glob(os.path.join(basepath, modelname + '_' + rmse + '.csv')):
         return True
     else:
         return False
