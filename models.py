@@ -5,10 +5,11 @@
 import numpy as np
 from surprise import (SVD, KNNBasic, accuracy)
 from helpers import (already_predicted, dump_predictions, dump_algo,
-                     better_rmse, load_predictions, beep)
+                     better_rmse, load_predictions, load_algo, beep)
 
 
-def svd(trainset, testset, fullset, force=False):
+def svd(trainset, testset, fullset, n_factors=100, n_epochs=20, lr_all=0.005,
+        reg_all=0.02, force=False, testing=False):
     # TODO:  write code to optimize parameters for svd algo.
     # TODO: figure out how to minimize contamination!!
     '''code for checking if things are already saved
@@ -20,13 +21,14 @@ def svd(trainset, testset, fullset, force=False):
             return
 
     '''
-    if not already_predicted('SVD') or force:
+    if not already_predicted('SVD') or force or testing:
         print('Running SVD model.')
-        algo = SVD()
+        algo = SVD(n_factors=n_factors, n_epochs=n_epochs, lr_all=lr_all,
+                   reg_all=reg_all)
         algo.fit(trainset)
         tr_predictions = algo.test(trainset.build_testset())
-        print('RMSE on training set: ', accuracy.rmse(tr_predictions,
-              verbose=False))
+        tr_rmse = accuracy.rmse(tr_predictions, verbose=False)
+        print('RMSE on training set: ', tr_rmse)
         # This is the test evaluation.
         predictions = algo.test(testset)
         rmse = accuracy.rmse(predictions, verbose=False)
@@ -34,21 +36,22 @@ def svd(trainset, testset, fullset, force=False):
         print('Generating predictions')
         predictions = algo.test(fullset.build_full_trainset().build_testset())
         rmse = np.around(rmse, 5)
-
-        if not already_predicted('SVD'):
-            dump_predictions(predictions, 'SVD', rmse)
-            dump_algo(algo, 'SVD', rmse)
-        elif better_rmse('SVD', rmse):
-            dump_predictions(predictions, 'SVD', rmse)
-            dump_algo(algo, 'SVD', rmse)
-        else:
-            print('Predictions and algorithm not saved. Performance '
-                  'inferior to existing model.')
-        beep()
+        if not testing:
+            if not already_predicted('SVD'):
+                dump_predictions(predictions, 'SVD', rmse)
+                dump_algo(algo, 'SVD', rmse)
+            elif better_rmse('SVD', rmse):
+                dump_predictions(predictions, 'SVD', rmse)
+                dump_algo(algo, 'SVD', rmse)
+            else:
+                print('Predictions and algorithm not saved. Performance '
+                      'inferior to existing model.')
+            beep()
+        if testing:
+            return algo, predictions, rmse - tr_rmse
     else:
         print('Loading SVD model from file...')
         predictions, rmse = load_predictions('SVD')
-
     return predictions, rmse
 
 
