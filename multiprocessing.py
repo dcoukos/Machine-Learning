@@ -23,14 +23,35 @@ def find_svd_parameters():
     n_factors = (2**exp for exp in range(1, 6))
     for f in n_factors:
         parameters.append((f, 20, 0.005, 0.002, trainset, testset, ratings))
-    best_factor = parameters[svd_multiprocess(parameters)][0]
-    '''n_epochs = range(20, 120, 20)
-    for f in n_factors:
-        for ep in n_epochs:
-            lr_all = (0.0005*10**exp for exp in range(1, 4))
-            for lr in lr_all:
-                reg_all = (0.02*f for f in range(0, 105, 5))
-                for reg in reg_all:
+    best_factor = parameters[svd_multiprocess(parameters)[0]][0]
+    parameters = []
+    n_epochs = range(20, 120, 20)
+    best_factor = 2
+    for ep in n_epochs:
+        parameters.append((best_factor, ep, 0.005, 0.002, trainset,
+                           testset, ratings))
+    best_epoch = parameters[svd_multiprocess(parameters)[0]][1]
+    parameters = []
+    len(parameters)
+    # Must have at least 4 factors
+    lr_all = (0.0005*10**exp for exp in range(1, 5))
+    for lr in lr_all:
+        parameters.append((best_factor, best_epoch, lr, 0.002, trainset,
+                           testset, ratings))
+    best_learning_rate = parameters[svd_multiprocess(parameters)[0]][2]
+    svd_multiprocess(parameters)[0]
+
+    len(parameters)
+    
+    parameters = []
+    reg_all = (0.02*f for f in range(0, 105, 5))
+    for reg in reg_all:
+        parameters.append((best_factor, best_epoch, best_learning_rate, reg,
+                           trainset, testset, ratings))
+    best_algo, best_predictions, best_regularization = \
+        parameters[svd_multiprocess(parameters)[0]]
+    '''
+
                     parameters.append((f, ep, lr, reg))'''
 
 
@@ -81,7 +102,10 @@ def best_rmse_index(model_output, set_sizes):
         if delta_rmse < min:
             min = delta_rmse
             best_index = index
-    return calculate_original_index(best_index, set_sizes)
+    best_original = calculate_original_index(best_index, set_sizes)
+    algo = model_output[best_index][0]
+    predictions = model_output[best_index][1]
+    return best_original, algo, model_output
 
 
 def calculate_original_index(index, set_sizes):
@@ -109,7 +133,7 @@ def find_knn_parameters():
     output2 = []
     output3 = []
     output4 = []
-    '''Test with svd model first...'''
+    """Test with svd model first..."""
     with Pool(processes=4) as pool:
         for param_set:
             output1 = pool.apply_async(svd, (*))'''

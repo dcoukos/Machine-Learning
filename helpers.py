@@ -95,13 +95,14 @@ def load_algo(name):
 
 def get_rmse_from_file(modelname):
     basepath = os.path.join('pickles', modelname + '_')
-    filename = os.path.relpath(basepath)
-    _, pickled_rmse = filename.split('_')
+    filename = glob(os.path.relpath(basepath) + '*')[0]
+    pickled_rmse, _ = filename.split('_')[1].split('.')
     return pickled_rmse.replace('-', '.')
 
 
 def better_rmse(modelname, rmse):
     '''Checks if pickled predictions, or model have better rmse than current'''
+    modelname = 'SVD'
     pickled_rmse = get_rmse_from_file(modelname)
     if rmse > float(pickled_rmse):
         return True
@@ -121,7 +122,8 @@ def already_predicted(modelname):
 def already_written(modelname, rmse):
     '''Checks if predictions already exist.'''
     basepath = os.path.join('precitions')
-    if glob(os.path.join(basepath, modelname + '_' + rmse + '.csv')):
+    if glob(os.path.join(basepath, modelname + '_' + rmse.astype('str')
+            + '.csv')):
         return True
     else:
         return False

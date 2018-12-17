@@ -81,7 +81,8 @@ def write_predictions(modelname, rmse, df_predictions):
         for pred in predictions:
             data.append('r{0}_c{1},{2}\n'.format(*pred))
 
-        path = os.path.join('predictions/', modelname + '_' + rmse + '.csv')
+        path = os.path.join('predictions/', modelname + '_' +
+                            rmse.astype('str') + '.csv')
         fp = open(path, 'w')
         fp.writelines(data)
         fp.close()
