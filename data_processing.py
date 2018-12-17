@@ -88,22 +88,21 @@ def write_predictions(modelname, rmse, df_predictions):
         fp.close()
 
 
-def check_labels(data):
+def check_labels(modelname, rmse):
     print('Checking labels')
+    import numpy as np
+    modelname = 'SVD'
+    rmse = np.float64(1.02639)
     original = open_file('data/data_train.csv')
-    ori_labels = []
-    for line in original:
-        label, _ = line.split(',')
-        ori_labels.append(label)
-
+    predicted = open_file('predictions/' + modelname + '_' + rmse.astype('str')
+                          + '.csv')
     pred_labels = []
-    for line in data[1:]:
-        label, _ = line.split(',')
-        pred_labels.append(label)
+    for string in predicted:
+        pred_labels.append(string.split(',')[0])
+    ori_labels = []
+    for string in original:
+        ori_labels.append(string.split(',')[0])
 
-    differences = set(ori_labels) - set(pred_labels)
-    intersection = set(ori_labels) & set(pred_labels)
-    if len(intersection) == 1176952:
+    if pred_labels == ori_labels:
         return True
-    else:
-        return differences
+    set(pred_labels) == set(ori_labels)
