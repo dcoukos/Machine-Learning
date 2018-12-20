@@ -10,8 +10,9 @@ import pandas as pd
 import numpy as np
 from surprise import Dataset
 from surprise import Reader
-from collections import Counter
 from helpers import already_written
+from surprise.model_selection import train_test_split
+from surprise import BaselineOnly
 
 
 def open_file(path):
@@ -52,23 +53,6 @@ def parse_review_line(line):
     return row, col, rating
 
 
-def remove_tail(ratings, min_count=10):
-    '''Removes data for items, users which are present less than the min_count
-    '''
-    counts_item = Counter(ratings['item'])
-    counts_item = dict(counts_item)
-    valid_items = {key: value for (key, value) in counts_item.items()
-                   if (value > min_count-1)}
-    valid_ratings = pd.DataFrame()
-    valid_ratings = ratings.loc[ratings['item'].isin(valid_items.keys())]
-    counts_user = Counter(valid_ratings['user'])
-    counts_user = dict(counts_user)
-    valid_users = {key: value for (key, value) in counts_user.items()
-                   if (value > min_count-1)}
-    valid_ratings = valid_ratings.loc[ratings['user'].isin(valid_users.keys())]
-    return valid_ratings
-
-
 def write_predictions(modelname, rmse, df_predictions):
     '''Saves predictions in dataframe to file defined by filepath.'''
     if already_written(modelname, rmse):
@@ -90,9 +74,6 @@ def write_predictions(modelname, rmse, df_predictions):
 
 def check_labels(modelname, rmse):
     print('Checking labels')
-    import numpy as np
-    modelname = 'SVD'
-    rmse = np.float64(1.02639)
     original = open_file('data/data_train.csv')
     predicted = open_file('predictions/' + modelname + '_' + rmse.astype('str')
                           + '.csv')
@@ -102,7 +83,21 @@ def check_labels(modelname, rmse):
     ori_labels = []
     for string in original:
         ori_labels.append(string.split(',')[0])
+    set(pred_labels) == set(ori_labels)
 
     if pred_labels == ori_labels:
         return True
-    set(pred_labels) == set(ori_labels)
+
+
+def return_labels():
+    data = open_file('data/data_train.csv')
+    labels = open_file('data/data_test.csv')
+    ratings = parse_as_dataset(data)
+    labels = parse_as_dataset(labels)
+    trainset, testset = train_test_split(ratings, test_size=0.2)
+
+    algo = BaselineOnly()
+    algo.fit(trainset)
+    train_labels = algo.test(trainset.build_testset())
+    test_labels = algo.test(testset)
+    return train_labels, test_labels
