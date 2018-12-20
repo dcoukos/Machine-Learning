@@ -5,10 +5,10 @@
 import numpy as np
 from surprise import (SVD, KNNBasic, accuracy, BaselineOnly, SlopeOne, CoClustering)
 from data_processing import open_file, parse_as_dataset
-from surprise.model_selection import train_test_split
 
 
-def svd(n_factors=5, n_epochs=40, lr_all=0.05, reg_all=0.02,
+def svd(trainset, testset, fullset, labels,
+        n_factors=5, n_epochs=40, lr_all=0.05, reg_all=0.02,
         train_as_test=False, testing=False):
     """Implements Single Value Decomposition .
 
@@ -36,13 +36,6 @@ def svd(n_factors=5, n_epochs=40, lr_all=0.05, reg_all=0.02,
         Set of rating predictions, and the root mean squared error of the model
         compared against the test set.
     """
-    data = open_file('data/data_train.csv')
-    labels = open_file('data/data_test.csv')
-    ratings = parse_as_dataset(data)
-    labels = parse_as_dataset(labels)
-    data = parse_as_dataset(data)
-    trainset, testset = train_test_split(ratings, test_size=0.2)
-    fullset = data.build_full_trainset()
 
     print('Running SVD model.')
     algo = SVD(n_factors=n_factors, n_epochs=n_epochs, lr_all=lr_all,
@@ -67,7 +60,8 @@ def svd(n_factors=5, n_epochs=40, lr_all=0.05, reg_all=0.02,
     return predictions, rmse
 
 
-def user_knn(min_support=10, range=40, train_as_test=False, testing=False):
+def user_knn(trainset, testset, fullset, labels,
+             min_support=10, range=40, train_as_test=False, testing=False):
     """Implements a k nearest neighbors algorithm from surprise,
     calculates similarities between users, using Pearon's coefficient.
 
@@ -91,13 +85,6 @@ def user_knn(min_support=10, range=40, train_as_test=False, testing=False):
         Set of rating predictions, and the root mean squared error of the model
         compared against the test set.
     """
-    data = open_file('data/data_train.csv')
-    labels = open_file('data/data_test.csv')
-    ratings = parse_as_dataset(data)
-    labels = parse_as_dataset(labels)
-    data = parse_as_dataset(data)
-    trainset, testset = train_test_split(ratings, test_size=0.2)
-    fullset = data.build_full_trainset()
     print('Running user-KNN model.')
     model_parameters = {
         'name': 'pearson',
@@ -125,7 +112,8 @@ def user_knn(min_support=10, range=40, train_as_test=False, testing=False):
     return predictions, rmse
 
 
-def movie_knn(min_support=10, range=40, train_as_test=False, testing=False):
+def movie_knn(trainset, testset, fullset, labels,
+              min_support=10, range=40, train_as_test=False, testing=False):
     """Implements a k nearest neighbors algorithm from surprise,
     calculates similarities between items, using Pearon's coefficient.
 
@@ -149,13 +137,6 @@ def movie_knn(min_support=10, range=40, train_as_test=False, testing=False):
         Set of rating predictions, and the root mean squared error of the model
         compared against the test set.
     """
-    data = open_file('data/data_train.csv')
-    labels = open_file('data/data_test.csv')
-    ratings = parse_as_dataset(data)
-    labels = parse_as_dataset(labels)
-    data = parse_as_dataset(data)
-    trainset, testset = train_test_split(ratings, test_size=0.2)
-    fullset = data.build_full_trainset()
     print('Running movie-KNN model.')
     model_parameters = {
       'name': 'pearson',
@@ -182,7 +163,8 @@ def movie_knn(min_support=10, range=40, train_as_test=False, testing=False):
     return predictions, rmse
 
 
-def baseline(train_as_test=False, testing=False):
+def baseline(trainset, testset, fullset, labels,
+             train_as_test=False, testing=False):
     """Implements the baseline model from the surprise package. Only the global
     mean, a user's average deviation from the global mean, and an item's
     average deviation from the global mean are considered.
@@ -202,13 +184,6 @@ def baseline(train_as_test=False, testing=False):
         Set of rating predictions, and the root mean squared error of the model
         compared against the test set.
     """
-    data = open_file('data/data_train.csv')
-    labels = open_file('data/data_test.csv')
-    ratings = parse_as_dataset(data)
-    labels = parse_as_dataset(labels)
-    data = parse_as_dataset(data)
-    trainset, testset = train_test_split(ratings, test_size=0.2)
-    fullset = data.build_full_trainset()
 
     print('Running baseline model.')
     algo = BaselineOnly()
@@ -231,7 +206,8 @@ def baseline(train_as_test=False, testing=False):
     return predictions, rmse
 
 
-def slope_one(train_as_test=False, testing=False):
+def slope_one(trainset, testset, fullset, labels,
+              train_as_test=False, testing=False):
     """Implements the slope one algorithm from the surprise package. This is a
     fast, simple algorithm based of single parameter regressions of the form
     f(x) = x + b.
@@ -251,14 +227,6 @@ def slope_one(train_as_test=False, testing=False):
         Set of rating predictions, and the root mean squared error of the model
         compared against the test set.
     """
-
-    data = open_file('data/data_train.csv')
-    labels = open_file('data/data_test.csv')
-    ratings = parse_as_dataset(data)
-    labels = parse_as_dataset(labels)
-    data = parse_as_dataset(data)
-    trainset, testset = train_test_split(ratings, test_size=0.2)
-    fullset = data.build_full_trainset()
 
     print('Running Slope-One model.')
     algo = SlopeOne()
@@ -281,7 +249,8 @@ def slope_one(train_as_test=False, testing=False):
     return predictions, rmse
 
 
-def co_clustering(n_clstr_usr=3, n_clstr_mv=3, train_as_test=False,
+def co_clustering(trainset, testset, fullset, labels,
+                  n_clstr_usr=3, n_clstr_mv=3, train_as_test=False,
                   testing=False):
     """Implements the co-clustering algorithm from the surprise package. Users
     and movies are divided into clusters, from which predictions are made
@@ -309,14 +278,6 @@ def co_clustering(n_clstr_usr=3, n_clstr_mv=3, train_as_test=False,
         compared against the test set.
 
     """
-    data = open_file('data/data_train.csv')
-    labels = open_file('data/data_test.csv')
-    ratings = parse_as_dataset(data)
-    labels = parse_as_dataset(labels)
-    data = parse_as_dataset(data)
-    trainset, testset = train_test_split(ratings, test_size=0.2)
-    fullset = data.build_full_trainset()
-
     print('Running Co-Clustering model.')
     algo = CoClustering(n_cltr_u=n_clstr_usr, n_cltr_i=n_clstr_mv)
     algo.fit(trainset)

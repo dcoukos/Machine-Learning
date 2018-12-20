@@ -14,10 +14,34 @@ from surprise.model_selection import train_test_split
 from surprise import BaselineOnly
 
 
+def preprocess(data):
+    """ Preproccess pandas dataframes such as training set and validation set
+    :return: df a with same index and fields item, user and rating
+    :param data: Dataframe with index 'r_X_c_Y' where X is the user and Y the movie e.g. r44_c1, and value the rating
+    :type data: pandas.DataFrame
+
+    Examples:
+        training = preprocess(the_data)
+        val_set = preprocess(validation_set)
+    """
+    df: pd.DataFrame = data.copy()
+    # process removing the r or c and converting them into integers
+    rs = [int(r[0][1:]) for r in df.index.str.split('_')]
+    cs = [int(c[1][1:]) for c in df.index.str.split('_')]
+    df['user'], df['item'] = rs, cs
+    return df
+
+
 def open_file(path):
     '''Open csv, and return list of lines.'''
     with open(path, 'r') as f:
         return f.read().splitlines()[1:]
+
+
+def rearrange_columns(df):
+    cols = df.columns.tolist()
+    cols = [cols[2], cols[1], cols[0]]
+    return df[cols]
 
 
 def parse_as_dataframe(data_list):
@@ -30,6 +54,10 @@ def parse_as_dataframe(data_list):
         ratings_dict['user'].append(col)
         ratings_dict['rating'].append(rating)
     return pd.DataFrame(ratings_dict, columns=['item', 'user', 'rating'])
+
+
+def parse_as_dataset_from_df(data):
+    return Dataset.load_from_df(data, Reader())
 
 
 def parse_as_dataset(data_list):
@@ -54,21 +82,19 @@ def parse_review_line(line):
 
 def write_predictions(modelname, rmse, df_predictions):
     '''Saves predictions in dataframe to file defined by filepath.'''
-    if already_written(modelname, rmse):
-        return 'already_written'
-    else:
-        predictions = [(int(i), int(u), int(np.round(rat)))
-                       for (i, u, _, rat, _) in df_predictions.values]
-        header = 'Id,Prediction\n'
-        data = [header]
-        for pred in predictions:
-            data.append('r{0}_c{1},{2}\n'.format(*pred))
 
-        path = os.path.join('predictions/', modelname + '_' +
-                            rmse.astype('str') + '.csv')
-        fp = open(path, 'w')
-        fp.writelines(data)
-        fp.close()
+    predictions = [(int(i), int(u), int(np.round(rat)))
+                   for (i, u, _, rat, _) in df_predictions.values]
+    header = 'Id,Prediction\n'
+    data = [header]
+    for pred in predictions:
+        data.append('r{0}_c{1},{2}\n'.format(*pred))
+
+    path = os.path.join('predictions/', modelname + '_' +
+                        rmse.astype('str') + '.csv')
+    fp = open(path, 'w')
+    fp.writelines(data)
+    fp.close()
 
 
 def write_tests(modelname, rmse, df_predictions):
