@@ -87,6 +87,22 @@ def write_tests(modelname, rmse, df_predictions):
     fp.close()
 
 
+def write_training_as_test(modelname, rmse, df_predictions):
+    '''Saves predictions in dataframe to file defined by filepath.'''
+    predictions = [(int(i), int(u), int(np.round(rat)))
+                   for (i, u, _, rat, _) in df_predictions.values]
+    header = 'Id,Prediction\n'
+    data = [header]
+    for pred in predictions:
+        data.append('r{0}_c{1},{2}\n'.format(*pred))
+
+    path = os.path.join('trainings/', modelname + '_' +
+                        rmse.astype('str') + '.csv')
+    fp = open(path, 'w')
+    fp.writelines(data)
+    fp.close()
+
+
 def check_labels(modelname, rmse):
     print('Checking labels')
     original = open_file('data/data_train.csv')
