@@ -10,7 +10,6 @@ import pandas as pd
 import numpy as np
 from surprise import Dataset
 from surprise import Reader
-from helpers import already_written
 from surprise.model_selection import train_test_split
 from surprise import BaselineOnly
 
@@ -70,6 +69,22 @@ def write_predictions(modelname, rmse, df_predictions):
         fp = open(path, 'w')
         fp.writelines(data)
         fp.close()
+
+
+def write_tests(modelname, rmse, df_predictions):
+    '''Saves predictions in dataframe to file defined by filepath.'''
+    predictions = [(int(i), int(u), int(np.round(rat)))
+                   for (i, u, _, rat, _) in df_predictions.values]
+    header = 'Id,Prediction\n'
+    data = [header]
+    for pred in predictions:
+        data.append('r{0}_c{1},{2}\n'.format(*pred))
+
+    path = os.path.join('tests/', modelname + '_' +
+                        rmse.astype('str') + '.csv')
+    fp = open(path, 'w')
+    fp.writelines(data)
+    fp.close()
 
 
 def check_labels(modelname, rmse):

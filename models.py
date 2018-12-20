@@ -9,8 +9,29 @@ from surprise.model_selection import train_test_split
 
 
 def svd(n_factors=5, n_epochs=40, lr_all=0.05, reg_all=0.02, testing=False):
-    '''Implements the single vale decomposition from surprise.
-    '''
+    """Implements Single Value Decomposition .
+
+    Parameters
+    ----------
+    n_factors : int
+        Number of factors in matrix factorization.
+    n_epochs : int
+        Number of epochs through which to iterate.
+    lr_all : float
+        The learning rate for movies and usersdetermines how quickly the
+        algorithm converges.
+    reg_all : float
+        Regularization term for movies and users.
+    testing : boolean
+        A True value indicates to return predictions for a test set, which are
+        used to determine coefficient for blending
+
+    Returns
+    -------
+    predictions, rmse: surprise.dataset, numpy.float64
+        Set of rating predictions, and the root mean squared error of the model
+        compared against the test set.
+    """
     data = open_file('data/data_train.csv')
     labels = open_file('data/data_test.csv')
     ratings = parse_as_dataset(data)
@@ -36,22 +57,12 @@ def svd(n_factors=5, n_epochs=40, lr_all=0.05, reg_all=0.02, testing=False):
     algo.fit(fullset)
     predictions = algo.test(labels.build_full_trainset().build_testset())
     rmse = np.around(rmse, 5)
-    if not testing:
-        if not already_predicted('SVD'):
-            dump_predictions(predictions, 'SVD', rmse)
-            dump_algo(algo, 'SVD', rmse)
-        elif better_rmse('SVD', rmse):
-            dump_predictions(predictions, 'SVD', rmse)
-            dump_algo(algo, 'SVD', rmse)
-        else:
-            print('Predictions and algorithm not saved. Performance '
-                  'inferior to existing model.')
-    if testing:
-        return algo, predictions, rmse, tr_rmse
+
+
     return predictions, rmse
 
 
-def user_knn(min_support=10, algorithm='basic', testing=False, range=40, testing=False):
+def user_knn(min_support=10, range=40, testing=False):
     data = open_file('data/data_train.csv')
     labels = open_file('data/data_test.csv')
     ratings = parse_as_dataset(data)
@@ -84,7 +95,7 @@ def user_knn(min_support=10, algorithm='basic', testing=False, range=40, testing
     return predictions, rmse
 
 
-def movie_knn(min_support=10, algorithm='basic', testing=False, range=40, testing=False):
+def movie_knn(min_support=10, range=40, testing=False):
     data = open_file('data/data_train.csv')
     labels = open_file('data/data_test.csv')
     ratings = parse_as_dataset(data)
@@ -98,8 +109,7 @@ def movie_knn(min_support=10, algorithm='basic', testing=False, range=40, testin
       'user_based': False,
       'min_support': min_support
     }
-    if algorithm is 'basic':
-        algo = KNNBasic(k=range, sim_options=model_parameters)
+    algo = KNNBasic(k=range, sim_options=model_parameters)
     algo.fit(trainset)
     tr_predictions = algo.test(trainset.build_testset())
     print('RMSE on training set: ', accuracy.rmse(tr_predictions,
