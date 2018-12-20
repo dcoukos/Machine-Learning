@@ -5,3 +5,6 @@ surprise
 random
 os
 pandas
+sklearn
+time
+multiprocessing
